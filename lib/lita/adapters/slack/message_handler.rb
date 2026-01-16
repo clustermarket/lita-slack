@@ -169,7 +169,9 @@ module Lita
           user = User.find_by_id(data["user"])
           if user.nil?
             user_data = API.new(robot.config.adapters.slack).user_info(data["user"])['user']
-            user = User.create( user_id, user_data )
+            # Convert all values to strings to avoid Redis FalseClass error
+            sanitized_data = user_data.transform_values { |v| v.to_s }
+            user = User.create( data["user"], sanitized_data )
           end
 
           dispatch_message(user)
